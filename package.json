@@ -1,0 +1,10 @@
+{
+    "name": "inode",
+    "description": "ini document node",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "3.x",
+        "pegjs": "0.7.0"
+    }
+}
