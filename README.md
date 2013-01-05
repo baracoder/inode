@@ -50,16 +50,16 @@ Indecies
 * Document
     * wird geupdated wenn ein tag oder das doc selbst sich geändert hat
     * description
-    * Tags (alle wörter, liste)
+    * tags[] alle wörter, liste
+    * files [] alle dateien in entsprechender reihenfolge
     * published (true/false)
     * createed (date)
+    * date (date) datum des ursprünglichen dokumentes
     * lastIndexed (date)
     * lastChanged (date)
-    * date (date)
 
 * File
-    * sha1
-    * document id
+    * sha1 (id)
     * text (automatisch extahiert oder leer)
     * lastChecked (Check im Dateisystem)
     * missing (bool, true bei check Fehler)
