@@ -5,6 +5,7 @@
     "private": true,
     "dependencies": {
         "express": "3.x",
+        "elastical":"*",
         "pegjs": "0.7.0"
     }
 }
