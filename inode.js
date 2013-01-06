@@ -18,7 +18,7 @@ app.put('/document/:id', document.update);
 app.delete('/document/:id', document.delete);
 
 app.get('/file/_search/:q', file.find);
-app.get('/file/:id', file.get);
+app.get('/file/:sha1', file.get);
 app.post('/file', file.add);
 app.put('/file/:id', file.update);
 app.delete('/file/:id', file.delete);

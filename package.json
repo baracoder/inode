@@ -8,6 +8,7 @@
         "elastical":"*",
         "pegjs": "0.7.0",
         "mime": "*",
+        "mmmagic": "*",
         "jar-flow": "git://github.com/chrisinajar/flow-js.git#master"
     }
 }
