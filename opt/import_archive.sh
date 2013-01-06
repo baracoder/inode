@@ -53,15 +53,20 @@ find "$BASE_DIR" -type f | while read F; do
     # 1. datei hochladen
     RES=`curl -s -X POST -F "file=@$F"   $BASE_URL/file`
     ERROR=`echo "$RES" | grep '"error":.*'`
-    [ "$ERROR" = "" ] || echo "$F: $ERROR" >> $LOG_ERRORS && continue
+    if [ "$ERROR" != "" -o "$RES" = "" ]; then
+        echo "$F: $ERROR" >> $LOG_ERRORS
+        continue
+    fi
     FILE_ID=`echo "$RES"|sed 's/.*"id":"\(\w\+\)".*/\1/g'`
-
 
     # 2. document erstellen
     RES=`curl -s -X POST  $BASE_URL/document \
-        -d "files=$FILE_ID&tags=$TAGS&desciption=$DESCR"`
+        -d "files=$FILE_ID&tags=$TAGS&description=$DESCR"`
     ERROR=`echo "$RES" | grep '"error":.*'`
-    [ "$ERROR" = "" ] || echo "F: $ERROR" >> $LOG_ERRORS && continue
+    if [ "$ERROR" != "" -o "$RES" = "" ]; then
+        echo "$F: $ERROR" >> $LOG_ERRORS
+        continue
+    fi
 
     # add file to resume_log
     echo "$F" >> "$LOG_IMPORTED"
