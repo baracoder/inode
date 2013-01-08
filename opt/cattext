@@ -12,6 +12,14 @@
 # * convert: manipulate images
 # fow word
 # * antiword: extract text from ms word files
+# * docx2txt
+# for misc
+# * strings
+# * mediainfo
+# * isoinfo
+# * tar
+# * unrar
+# * detex
 
 
 ############################################################################3
@@ -23,6 +31,9 @@ PROCS=2
 ############################################################################3
 
 cleanup() {
+    e ""
+    e "-------"
+    e "cleanup"
     test "$TEMPDIR" != "" -a -e "$TEMPDIR" && rm -r $TEMPDIR
 }
 
@@ -39,17 +50,23 @@ e() {
 
 do_pdf() {
     e "pdf: extracting text"
-    pdftotext  -raw -nopgbrk -q $FILE - >> $TXTDIR/0-pdftotext.txt
+    pdftotext  -raw -nopgbrk -q "$FILE" - >> $TXTDIR/0-pdftotext.txt
 
     e "pdf: extracting images"
     # export images
-    pdfimages -p $FILE $IMGDIR/out
+    pdfimages -p "$FILE" $IMGDIR/out
 
     # join images to pages
     for i in `ls -1 $IMGDIR | cut -c -7|uniq`; do
         convert $IMGDIR/$i* -append -unsharp 10 $IMGDIR/page_$i.ppm
         rm $IMGDIR/$i*
     done
+    do_ocr
+}
+
+do_image() {
+    e "image: preparing for ocr"
+    convert "$FILE" $IMGDIR/page_out-001.ppm
     do_ocr
 }
 
@@ -69,28 +86,73 @@ do_ocr() {
 
 do_msword() {
     e "msword: running antiword"
-    antiword $FILE > $TXTDIR/antiword.txt
+    antiword "$FILE" >> $TXTFILE
+    docx2txt "$FILE" - >> $TXTFILE
+
 
     # TODO extract pictures, ocr
 }
 
 do_odt() {
     e "odt: running odt2txt"
-    odt2txt $FILE > $TXTDIR/antiword.txt
+    odt2txt "$FILE" > $TXTDIR/antiword.txt
 
     # TODO extract pictures, ocr
+}
+
+do_strings() {
+    e 'strings: extracting strings'
+    # dont extract to much, it will be shortened later either way
+    strings -n 5 "$FILE"|head -c 20000 >> $TXTFILE
+}
+
+do_detex() {
+    e 'detex: removing TeX'
+    detex "$FILE" >> $TXTFILE
+}
+
+do_plain() {
+    e 'plain: copying text :)'
+    cat "$FILE" >> $TXTFILE
+}
+
+do_video_meta() {
+    e 'video_meta: extracting meta information'
+    mediainfo "$FILE"|grep -v 'Complete name'|cut -d: -f2- >> $TXTFILE
+}
+
+do_iso() {
+    e 'iso: crating file list'
+    isoinfo -f -i "$FILE" >> $TXTFILE
+}
+
+do_ziplist() {
+    e 'ziplist: crating file list'
+    unzip -lqq "$FILE" |awk '{print $4}' >> $TXTFILE
+}
+
+do_bz2list() {
+    e 'bz2list: crating file list'
+    tar -jtf "$FILE" >> $TXTFILE
+}
+
+do_rarlist() {
+    e 'rarlist: crating file list'
+    unrar lb "$FILE" >> $TXTFILE
 }
 
 finish() {
     e "done"
     e "-------"
-    # clen up
-    # remove blank space
+    # clen up, remove tags, blank space, tolongwordsmorethan20
     cat $TXTDIR/* | \
         tr '\n' ' ' |\
-        sed 's/[^/:;+=&^%$#!`~?<>*€a-zäöüA-ZÄÖÜß0-9@_., -]//g'| \
+        sed 's/<[^>]\+>//g'|\
+        sed 's/[^/:;+=&^%$#!`~?*€a-zäöüA-ZÄÖÜß0-9@_., -]//g'| \
         sed 's/[=+#-]\{2,\}//g'|\
         sed 's/\s\+/ /g'|\
+        sed 's/^\s\+$//g'|\
+        sed 's/[^ ]\{20,\}\+/BLA/g'|\
         cat
         # TODO zeichen whiteliste anpassen
 }
@@ -98,10 +160,10 @@ finish() {
 
 ############################################################################3
 
-FILE=$1
+FILE="$1"
 
 # test if file exists before doing some actual work
-test -e $FILE || die "file does not exist"
+test -e "$FILE" || die "file does not exist"
 
 # make shure the folder does not exist
 while true; do
@@ -113,6 +175,7 @@ mkdir $TEMPDIR || die
 
 IMGDIR=$TEMPDIR/images
 TXTDIR=$TEMPDIR/text
+TXTFILE=$TXTDIR/0.txt
 mkdir $IMGDIR || die
 mkdir $TXTDIR || die
 
@@ -125,26 +188,70 @@ trap "cleanup" INT QUIT ABRT KILL TERM
 
 ############################################################################3
 # determine file format
-MIME=`file -b --mime-type $1`
+MIME=`file -b --mime-type "$FILE"`
 
 case "$MIME" in
     application/pdf)
-        e "pdf mime detected"
+        e 'pdf mime detected'
         do_pdf
         ;;
     application/msword)
-        e "msword mime detected"
+        e 'msword mime detected'
         do_msword
         ;;
     application/vnd.oasis.opendocument.text)
-        e "odt mime detected"
+        e 'odt mime detected'
         do_odt
         ;;
+    application/x-executable)
+        e 'executable detected'
+        do_strings
+        ;;
+    text/plain)
+        e 'plain text detected'
+        do_plain
+        ;;
+    text/html)
+        e 'html detected'
+        do_plain # tags removed in finish
+        ;;
+    video/*)
+        e 'video detected'
+        do_video_meta
+        ;;
+    application/x-iso9660-image)
+        e 'iso detected'
+        do_iso
+        ;;
+    application/octet-stream)
+        e 'binary file detected'
+        do_strings
+        ;;
+    application/zip)
+        e 'zip detected'
+        do_ziplist
+        ;;
+    application/x-bzip2)
+        e 'bzip2 detected'
+        do_bz2list
+        ;;
+    application/x-rar)
+        e 'rar detected'
+        do_rarlist
+        ;;
+    image/*)
+        e 'image detected'
+        do_image
+        ;;
+    text/x-tex)
+        e 'tex detected'
+        do_detex
+        ;;
     *)
-        die "format not scannable"
+        die 'format not scannable'
         ;;
 esac
 
 finish
-
+cleanup
 
