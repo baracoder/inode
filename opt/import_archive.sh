@@ -57,7 +57,8 @@ find "$BASE_DIR" -type f | while read F; do
         echo "$F: $ERROR" >> $LOG_ERRORS
         continue
     fi
-    FILE_ID=`echo "$RES"|sed 's/.*"id":"\(\w\+\)".*/\1/g'`
+    FILE_ID=`echo "$RES"|sed 's/.*"id":"\([^"]\+\)".*/\1/g'`
+    echo $FILE_ID
 
     # 2. document erstellen
     RES=`curl -s -X POST  $BASE_URL/document \
