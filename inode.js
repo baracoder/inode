@@ -57,7 +57,7 @@ flow.exec(function() {
                         missing: { type: 'boolean'},
                         mime: {
                             type: 'string',
-                            qGYsUj_1Ri6j3hr0QD9_yQ
+                            index:'not_analyzed'
                         }
                     }
                 },
