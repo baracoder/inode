@@ -47,23 +47,21 @@ Grundsätzliche Ideen:
 Indecies
 --------
 
-* Document
-    * wird geupdated wenn ein tag oder das doc selbst sich geändert hat
+* Document (wird geupdated wenn ein tag oder das doc selbst sich geändert hat)
     * description
     * tags[] alle wörter, liste
     * files [] alle dateien in entsprechender reihenfolge
+        * sha1.ext [aus mimetype]
+        * missing (bool, true bei check Fehler)
+        * mime (string, mime)
+        * size
     * published (true/false)
     * createed (date)
+    * lastChecked (Check im Dateisystem)
     * date (date) datum des ursprünglichen dokumentes
     * lastIndexed (date)
     * lastChanged (date)
-
-* File
-    * sha1 (id)
     * text (automatisch extahiert oder leer)
-    * lastChecked (Check im Dateisystem)
-    * missing (bool, true bei check Fehler)
-    * mimeType (string, mime)
 
 * Tag
     * name
