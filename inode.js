@@ -12,6 +12,7 @@ app.configure(function () {
     app.use(express.logger('dev')); /* 'default', 'short', 'tiny', 'dev' */
     app.use(express.bodyParser());
     //app.use(express.limit('20mb')); // TODO absprechen
+    app.use('/static', express.static(__dirname + '/public'));
 });
 
 // route documents
