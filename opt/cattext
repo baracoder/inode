@@ -56,6 +56,15 @@ do_pdf() {
     # export images
     pdfimages -p "$FILE" $IMGDIR/out
 
+    e "pdf: removing to small images"
+    # delete small images
+    find $IMGDIR -type f | while read F; do
+        identify -verbose $F|awk '/Geometry/{print($2)}'|\
+                cut -f1 -d+|tr 'x' ' ' | ( read W H
+            test $W -lt 100 -o $H -lt 16 && rm $F
+        )
+    done
+
     # join images to pages
     for i in `ls -1 $IMGDIR | cut -c -7|uniq`; do
         convert $IMGDIR/$i* -append -unsharp 10 $IMGDIR/page_$i.ppm
