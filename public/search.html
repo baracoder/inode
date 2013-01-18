@@ -128,10 +128,10 @@ Search.execute = function(query) {
                 url:'/document/_search/'+encodeURI(query),
                 dataType: 'json',
                 success: function(data, textStatus, jqXHR) {
-                    Search.containerResults.html('<p>'+data['data'].total+' insgesamt</p>');
                     if(data['error']) {
                             Error.append(data['error']);
                     } else {
+                            Search.containerResults.html('<p>'+data['data'].total+' insgesamt</p>');
                             console.log(data['data']);
                             var hits = data['data'].hits;
                             for(var i in hits) {
