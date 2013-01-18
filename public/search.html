@@ -142,13 +142,17 @@ Search.execute = function(query) {
 };
 
 Search.add = function(hit) {
+    var text_highlights = '';
+    if(hit.highlight)
+        var text_highlights = hit.highlight.text.join(' ...  ').replace(/<em>/g,'<b>').replace(/<\/em>/g,'</b>');
+
     var h = $('<div class="accordion-group"/>');
     h.html('<div class="accordion-heading">'
             +'<span onClick="Search.download(\''+ hit._source.files[0].id+'\')" class="btn btn-success pull-right">Download</span>'
             +'<a class="accordion-toggle">'+hit._source.description+'</a> '
             +'Tags: '+hit._source.tags.join(', ')
             +'</div><div class="accordion-body">'
-            +'<div class="accordion-inner">'+hit._source.text+'</div></div></div>');
+            +'<div class="accordion-inner">'+text_highlights+'</div></div></div>');
     this.results.push(h);
     this.containerResults.append(h);
 };
