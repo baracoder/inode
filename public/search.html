@@ -58,40 +58,58 @@
 
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
+          <li><a href="//infoini.de/">infoini</a></li>
+          <li class="active" id="li_search"><a href="#">Suche</a></li>
+          <li id="li_upload"><a href="#">Hochladen</a></li>
         </ul>
         <h3 class="muted">inode</h3>
       </div>
 
       <hr>
 
-      <div class="jumbotron">
-        <h1>Lernhilfen</h1>
-        <p class="lead">Bitte Suchbegriff eingeben</p>
-        <p>
-                <form id="form_q" class="form-search">
-                  <input type="text" id="q" class="search-query span6"/> <input type="submit" class="btn" value="suchen"/>
-                </form>
+      <div id="div_upload" style="display:none;">
+        <hr>
+        <h1>Hochladen</h1>
+
+        <ol>
+          <li>Datei auswählen <input type="file" id="upload_files" class="btn" multiple="multiple" /></li>
+          <li>Hochladen starten <input type="button" value="hochladen"/></li>
+          <li>Beschreibung eingeben <input type="text"/></li>
+          <li>Tags eingeben <input type="text"/></li>
+          <li>Datum der Erstellung auswählen</li>
+          <li>Hinzufügen</li>
+        </ol>
       </div>
 
-      <hr>
-      <div id="errors">
-      </div>
+      <div id="div_search">
+          <div class="jumbotron">
+            <h1>Lernhilfen</h1>
+            <p>
+                    <form id="form_q" class="form-search">
+                      <p class="muted"><small>Beispiele:
+                          <a hfre="#" class="muted example_q">klausur ws08 informatik</a> |
+                          <a hfre="#" class="muted example_q">(tag:ws08 AND Systemtheorie) OR ("exakte angaben" AND tag:tb)</a> |
+                          <a hfre="#" class="muted example_q">NOT klausur</a>
+                      </p>
+                      <input type="text" id="q" class="search-query input-xxlarge"/> <input type="submit" class="btn" value="suchen"/>
+                    </form>
+          </div>
 
-      <div id="results" class="accordion">
-      </div>
 
-      <hr>
-      <ul class="pager">
-        <li><a href="#">Previous</a></li>
-        <li><a href="#">Next</a></li>
-      </ul>
+          <hr>
+          <div id="errors">
+          </div>
+
+          <p id="resultsCount"></p>
+          <div id="results" class="accordion">
+          </div>
+
+          <a href="#" id="a_more" style="display:block;" class="btn btn-large">Mehr</a>
+      </div>
 
       <hr>
       <div class="footer">
-        <p>&copy; Company 2013</p>
+        <p>&copy; infoini 2013</p>
       </div>
 
 
@@ -118,27 +136,52 @@ Error.clear = function() {
 
 var Search = {};
 Search.containerResults = $('#results');
-Search.results = [];
+Search.containerResultsCount = $('#resultsCount');
+Search.btnMore = $('#a_more');
+Search.resultsSize = 10;
 
-Search.execute = function(query) {
-        // TODO ajax query
-        this.containerResults.text('...');
+Search.start = function(query) {
+    this.query = query;
+    this.containerResults.text('');
+    this.results = [];
+    this.resultsFrom = 0;
+
+    this.execute();
+};
+
+Search.execute = function() {
         Error.clear();
         $.ajax({
-                url:'/document/_search/'+encodeURI(query),
-                dataType: 'json',
+                url:'/document/_search/'+encodeURI(this.query),
+                dataType: 'json', // TODO offset + size parameter setzen
+                data:{
+                    from: this.resultsFrom,
+                    size: this.resultsSize,
+                },
                 success: function(data, textStatus, jqXHR) {
                     if(data['error']) {
                             Error.append(data['error']);
                     } else {
-                            Search.containerResults.html('<p>'+data['data'].total+' insgesamt</p>');
+                            Search.containerResultsCount.text(data['data'].total+' insgesamt');
                             console.log(data['data']);
                             var hits = data['data'].hits;
                             for(var i in hits) {
                                 Search.add(hits[i]);
                             }
+
+                            if(data['data'].total-Search.resultsFrom-Search.resultsSize > 0) {
+                                Search.btnMore.show();
+                            } else {
+                                Search.btnMore.hide();
+                            }
                     }
         }});
+};
+
+Search.more = function() {
+    this.resultsFrom += this.resultsSize;
+    this.containerResults.find('.accordion-group').addClass('muted');
+    this.execute();
 };
 
 Search.add = function(hit) {
@@ -171,8 +214,31 @@ Search.clear = function() {
 $('#form_q').submit(function(form) {
         form.preventDefault();
         var q = $('#q').val();
-        Search.execute(q);
+        Search.start(q);
 });
+$('.example_q').click(function() {
+    $('#q').val($(this).text());
+});
+$('#li_upload a').click(function(e) {
+    e.preventDefault();
+    $(this).addClass('active');
+    $('#li_upload').addClass('active');
+    $('#li_search').removeClass('active');
+    $('#div_upload').show();
+    $('#div_search').hide();
+});
+$('#li_search a').click(function(e) {
+    e.preventDefault();
+    $('#li_search').addClass('active');
+    $('#li_upload').removeClass('active');
+    $('#div_search').show();
+    $('#div_upload').hide();
+});
+$('#a_more').click(function(e) {
+    e.preventDefault();
+    Search.more();
+}).hide();
+
 
 </script>
   </body>
