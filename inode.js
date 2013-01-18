@@ -46,8 +46,16 @@ flow.exec(function() {
     ec.putMapping('documents','document',{
         document: {
             properties: {
-                description: { type:'string'},
-                tags: {type:'string',index_name:'tag'},
+                description: {
+                    type:'string',
+                    term_vector:"with_positions_offsets",
+                    store:'yes'
+                },
+                tags: {
+                    type:'string',
+                    index_name:'tag',
+                    store:'yes'
+                },
                 files: {
                     type:'nested',
                     properties: {
@@ -68,6 +76,11 @@ flow.exec(function() {
                 lastIndexed: {type:'date'},
                 lastChecked: {type:'date'},
                 lastChanged: {type:'date'},
+                text: { 
+                    type:'string',
+                    term_vector:"with_positions_offsets",
+                    store:'yes'
+                }
             }
         }
     },this.MULTI());
