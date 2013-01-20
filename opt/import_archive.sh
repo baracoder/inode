@@ -10,6 +10,7 @@ BASE_URL=$2
 LOGDIR=/tmp/import_archive_logs
 LOG_IMPORTED=$LOGDIR/files_imported
 LOG_ERRORS=$LOGDIR/errors
+COOKIE=$LOGDIR/cookie.txt
 
 [ -d "$BASE_DIR" ] || die "Directory not found: $BASE_DIR"
 [ $# = 2 ]  || die "Wrong arg count: $0 archive-dir base_url"
@@ -33,8 +34,17 @@ echo '--------------------------------------------------------------------------
 
 PREFLEN=`echo -n "$BASE_DIR"|wc -m`
 
-# TODO: einloggen, sessionid speichern
+# login
+read -p 'login: ' USERNAME
+read -s -p 'password: ' PASSWORD
+RES=`curl -XPOST -d "username=$USERNAME&password=$PASSWORD" $BASE_URL/user/login`
+ERROR=`echo "$RES" | grep '"error":.*'`
+if [ "$ERROR" != "" -o "$RES" = "" ]; then
+    die "$F: $ERROR" >> $LOG_ERRORS
+fi
 
+
+# import files
 find "$BASE_DIR" -type f | while read F; do 
     # check if file already scanned
     grep -q "$F" "$LOG_IMPORTED" && continue
@@ -51,7 +61,7 @@ find "$BASE_DIR" -type f | while read F; do
     echo "t:$TAGS"
     # TODO: curl requests:
     # 1. datei hochladen
-    RES=`curl -s -X POST -F "file=@$F"   $BASE_URL/file`
+    RES=`curl -c $COOKIE -b $COOKIE -s -X POST -F "file=@$F"   $BASE_URL/file`
     ERROR=`echo "$RES" | grep '"error":.*'`
     if [ "$ERROR" != "" -o "$RES" = "" ]; then
         echo "$F: $ERROR" >> $LOG_ERRORS
@@ -61,7 +71,7 @@ find "$BASE_DIR" -type f | while read F; do
     echo $FILE_ID
 
     # 2. document erstellen
-    RES=`curl -s -X POST  $BASE_URL/document \
+    RES=`curl -c $COOKIE -b $COOKIE -s -X POST  $BASE_URL/document \
         -d "files=$FILE_ID&tags=$TAGS&description=$DESCR"`
     ERROR=`echo "$RES" | grep '"error":.*'`
     if [ "$ERROR" != "" -o "$RES" = "" ]; then
