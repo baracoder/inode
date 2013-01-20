@@ -1,6 +1,7 @@
 var express = require('express');
 var DocumentController = require('./lib/documentController');
 var FileController = require('./lib/fileController');
+var UserController = require('./lib/userController');
 var elastical = require('elastical');
 var flow = require('jar-flow');
 
@@ -13,6 +14,11 @@ app.configure(function () {
     app.use(express.bodyParser());
     //app.use(express.limit('20mb')); // TODO absprechen
     app.use('/static', express.static(__dirname + '/public'));
+    app.use(express.cookieParser());
+    app.use(express.cookieSession({
+        secret:''+Math.random()+new Date(),
+        key:'inode'
+        }));
 });
 
 // route documents
@@ -26,6 +32,10 @@ app.get('/file/:id', FileController.get);
 app.post('/file', FileController.add);
 app.put('/file/:id', FileController.update);
 app.delete('/file/:id', FileController.delete);
+
+app.post('/user/login',UserController.login);
+app.post('/user/logout',UserController.logout);
+app.get('/user/status',UserController.status);
 
 var port = 3000;
 
