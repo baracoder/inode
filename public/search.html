@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+  <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      THIS IS AS QUICK AND AS DIRTY AS IT CAN BE
+      DO NOT USE THIS AS AN EXAMPLE FOR YOUR CODE STYLE
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
   <head>
     <meta charset="utf-8">
     <title>inode</title>
@@ -41,6 +50,9 @@
       .marketing p + h4 {
         margin-top: 28px;
       }
+      .example_q {
+        cursor:pointer;
+      }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -58,10 +70,10 @@
 
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <li><a href="//infoini.de/">infoini</a></li>
-          <li class="active" id="li_upload"><a href="#">Upload</a></li>
-          <li id="li_login"><a href="#">Login</a></li>
-          <li id="li_search"><a href="#">Suche</a></li>
+          <li class="active" id="li_upload"><a href="#"><i class="icon-file"></i> Hochladen</a></li>
+          <li id="li_login"><a href="#"><i class="icon-user"></i> Login</a></li>
+          <li id="li_search"><a href="#"><i class="icon-search"></i> Suche</a></li>
+          <li><a href="//infoini.de/"><i class="icon-home"></i> infoini</a></li>
         </ul>
         <h3 class="muted">inode</h3>
       </div>
@@ -75,22 +87,24 @@
         <h1>Hochladen</h1>
 
         <ol>
-          <li>Datei auswählen <input type="file" id="upload_files" class="btn" multiple="multiple" /></li>
-          <li>Hochladen starten <input type="button" value="hochladen"/></li>
-          <li>Beschreibung eingeben <input type="text"/></li>
-          <li>Tags eingeben <input type="text"/></li>
-          <li>Datum der Erstellung auswählen</li>
-          <li>Hinzufügen</li>
+          <li>Datei(-en) hochladen <div id="upload_files"></div>
+              <button id="btn_upload" class="btn btn-success">Hochladen</button></li>
+          <li>Beschreibung eingeben <input id="upload_description" type="text"/></li>
+          <li>Mindestens 3 Tags eingeben <input id="upload_tags" type="text"/></li>
+          <li><button id="btn_submit" class="btn btn-primary disabled">Dokument anlegen</button> </li>
         </ol>
+                <button id="btn_reset" class="btn btn-danger">Reset</button>
       </div>
 
-      <div id="div_login" style="display:none;width:400px;">
+      <div id="div_login" style="display:none;width:300px;margin:auto;">
         <h1>Login</h1>
           <form class="form-signin" id="form_login">
-            <input id="login_username" type="text" class="input-block-level" placeholder="Email address">
+            <input id="login_username" type="text" class="input-block-level" placeholder="Redmine username">
             <input id="login_password" type="password" class="input-block-level" placeholder="Password">
             <button class="btn btn-large btn-primary" type="submit">Sign in</button>
           </form>
+          <hr/>
+        <h1>Logout</h1>
           <button id="btn_logout" class="btn btn-large btn-primary">Sign out</button>
       </div>
 
@@ -103,6 +117,7 @@
                           <a hfre="#" class="muted example_q">klausur ws08 informatik</a> |
                           <a hfre="#" class="muted example_q">(tag:ws08 AND Systemtheorie) OR ("exakte angaben" AND tag:tb)</a> |
                           <a hfre="#" class="muted example_q">NOT klausur</a>
+                          </small>
                       </p>
                       <input type="text" id="q" class="search-query input-xxlarge"/> <input type="submit" class="btn" value="suchen"/>
                     </form>
@@ -129,11 +144,16 @@
     <script src="js/bootstrap.min.js"></script>
 <script>
 
+/////////////////////////////////////////////////////////////////////////////
+// messages
 var Msg = {};
 Msg.messages = [];
 Msg.containerMsgs = $('#msgs');
 Msg.append = function(type,text) {
         var msg = $('<p/>').html(text).addClass('alert').addClass(type);
+        msg.click(function() {
+            msg.remove();
+        });
         this.messages.push(msg);
         this.containerMsgs.append(msg);
 };
@@ -145,6 +165,8 @@ Msg.clear = function() {
     this.messages = [];
 };
 
+/////////////////////////////////////////////////////////////////////////////
+// search
 var Search = {};
 Search.containerResults = $('#results');
 Search.containerResultsCount = $('#resultsCount');
@@ -203,8 +225,15 @@ Search.add = function(hit) {
         var text_highlights = hit.highlight.text.join(' ...  ').replace(/<em>/g,'<b>').replace(/<\/em>/g,'</b>');
 
     var h = $('<div class="accordion-group"/>');
+    var files = hit._source.files;
+    var downloadLinks = '';
+    for(var i in files) {
+        var num = parseInt(i)+1; // warum ist i kein int hier????
+        downloadLinks+='<span onClick="Search.download(\''+ files[i].id+'\')" class="btn btn-success ">Download file '+num+'</span> ';
+
+    }
     h.html('<div class="accordion-heading">'
-            +'<span onClick="Search.download(\''+ hit._source.files[0].id+'\')" class="btn btn-success pull-right">Download</span>'
+            +'<div class="pull-right">'+downloadLinks+'</div>'
             +''+hit._source.description+'<br/> '
             +'<b>Tags:</b> '+hit._source.tags.join(', ')
             +'</div><div class="accordion-body">'
@@ -224,6 +253,21 @@ Search.clear = function() {
     this.results = [];
 };
 
+$('#a_more').click(function(e) {
+    e.preventDefault();
+    Search.more();
+}).hide();
+$('#form_q').submit(function(form) {
+        form.preventDefault();
+        var q = $('#q').val();
+        Search.start(q);
+});
+$('.example_q').click(function() {
+    $('#q').val($(this).text());
+});
+
+/////////////////////////////////////////////////////////////////////////////
+// login
 User = {};
 User.login = function(username,password) {
     $.ajax({
@@ -268,15 +312,108 @@ $('#btn_logout').click(function(form) {
         User.logout();
 });
 
-$('#form_q').submit(function(form) {
-        form.preventDefault();
-        var q = $('#q').val();
-        Search.start(q);
-});
-$('.example_q').click(function() {
-    $('#q').val($(this).text());
+/////////////////////////////////////////////////////////////////////////////
+// upload
+Upload = {};
+Upload.uploadFiles = function(files) {
+    for(var i in files) Upload._uploadFile(files[i]);
+};
+
+Upload.queue = [];
+Upload.ids = [];
+Upload.queueContainer = $('#upload_files');
+Upload.submitButton = $('#btn_submit');
+Upload.inputTags = $('#upload_tags');
+Upload.inputDescription = $('#upload_description');
+
+Upload.addToQueue = function() {
+    var iframeId = 'upload_frame'+this.iframeCount++;
+    var statusText = $('<div class="alert alert-info"></div>');
+    var upload_form = $('<form/>').append('<input style="display:none;" type="file" name="file"/>')
+    .append(statusText)
+    .appendTo(Upload.queueContainer)
+    .find('input').click().change(function(e) {
+        upload_form.submit();
+        statusText.text('lade.. '+this.files[0].name);
+    })
+    .submit(function(e) {
+        e.preventDefault();
+        var data = new FormData();
+        var fileName = this.files[0].name;
+        data.append('file', this.files[0]);
+        // Ajax-Call
+        $.ajax({
+            url: '/file',
+            data: data,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            success: function(data, textStatus, jqXHR) {
+                statusText.removeClass('alert-info');
+                if(data.error) {
+                    Upload.ids.push(data.data.id);
+                    return  statusText.text(data.error.message);
+                }
+                statusText.addClass('alert-success');
+                statusText.text('OK '+fileName);
+                Upload.ids.push(data.data.id);
+                Upload.checkSubmitable();
+            }
+        });
+    });
+
+    Upload.queue.push(upload_form);
+};
+
+Upload.submittable = function() {
+    return Upload.inputDescription.val() !== '' &&
+        Upload.inputTags.val().split(',').length>=3 &&
+        Upload.ids.length>0;
+};
+
+Upload.checkSubmitable = function() {
+    if(Upload.submittable()) {
+        Upload.submitButton.removeClass('disabled');
+    } else {
+        Upload.submitButton.addClass('disabled');
+    }
+};
+Upload.submit = function() {
+    if(!Upload.submittable()) return;
+    $.ajax({
+            url:'/document',
+            type: "POST",
+            dataType: 'json',
+            data:{
+                description: Upload.inputDescription.val(),
+                tags: Upload.inputTags.val(),
+                files: Upload.ids.join(',')
+            },
+            success: function(data, textStatus, jqXHR) {
+                console.log(data);
+                if(data.error) {
+                        Msg.append('alert-error',data.error.message);
+                } else {
+                        Msg.append('alert-success','upload successful');
+                }
+    }});
+};
+
+
+$('#btn_upload').click( Upload.addToQueue);
+$('#upload_tags').keyup(Upload.checkSubmitable);
+$('#upload_description').keyup(Upload.checkSubmitable);
+$('#btn_submit').click(Upload.submit);
+$('#btn_reset').click(function() {
+    window.location.reload();
 });
 
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+// navigation
 $('#li_upload a').click(function(e) {
     e.preventDefault();
     $('.nav li').removeClass('active');
@@ -301,15 +438,12 @@ $('#li_search a').click(function(e) {
     $('#div_search').show();
     $('#div_upload').hide();
 });
-$('#a_more').click(function(e) {
-    e.preventDefault();
-    Search.more();
-}).hide();
 
 
 
 
 
 </script>
+
   </body>
 </html>
