@@ -30,7 +30,6 @@ app.delete('/document/:id', DocumentController.delete);
 
 app.get('/file/:id', FileController.get);
 app.post('/file', FileController.add);
-app.put('/file/:id', FileController.update);
 app.delete('/file/:id', FileController.delete);
 
 app.post('/user/login',UserController.login);
