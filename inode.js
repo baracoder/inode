@@ -44,7 +44,6 @@ var port = 3000;
 flow.exec(function() {
 // create indicies if not existing
     ec.createIndex('documents',this.MULTI());
-    ec.createIndex('tags',this.MULTI());
     ec.createIndex('queries',this.MULTI());
 }, function(results) {
 // create or update indicies
@@ -94,17 +93,7 @@ flow.exec(function() {
         }
     },this.MULTI());
 
-    // tag mapping
-    ec.putMapping('tags','tag',{
-        tag: {
-            properties: {
-                name: { type:'string'},
-                words: {type:'string',index_name:'tag'},
-            }
-        }
-    },this.MULTI());
-
-    // tag mapping
+    // queries mapping
     ec.putMapping('queries','docsearch',{
         docsearch: {
             properties: {

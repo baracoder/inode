@@ -63,11 +63,6 @@ Indecies
     * lastChanged (date)
     * text (automatisch extahiert oder leer)
 
-* Tag
-    * name
-    * words[]
-    * wenn geändert, werden "verknüpfte" dokumente neu indiziert
-
 * Queries
     * Erfolgreiche Suchqueries für autovervollständigung
 
@@ -119,23 +114,6 @@ File
 * ``/file/SHA1`` GET
     * Response: Datei
 
-Tag
----
-
-* ``/tag/NAME/merge`` POST
-    * parameter: name des anderen tags
-    * response: ok/error
-
-* ``/tag/NAME/rename`` POST
-    * parameter: neuer name
-    * response: ok/error
-
-Word
-----
-
-* `/word/` GET
-    * Parameter: Teilstring eines Wortes
-    * response: tag
 
 Authentifizierung
 -----------------
