@@ -1,9 +1,11 @@
 var express = require('express');
+var elastical = require('elastical');
+var flow = require('jar-flow');
+
+var config = require('./config');
 var DocumentController = require('./lib/documentController');
 var FileController = require('./lib/fileController');
 var UserController = require('./lib/userController');
-var elastical = require('elastical');
-var flow = require('jar-flow');
 
 
 var ec = new elastical.Client();
@@ -36,7 +38,6 @@ app.post('/user/login',UserController.login);
 app.post('/user/logout',UserController.logout);
 app.get('/user/status',UserController.status);
 
-var port = 3000;
 
 
 
@@ -106,7 +107,7 @@ flow.exec(function() {
     console.log('updated:');
     console.log(results);
 
-    app.listen(port);
-    console.log('Listening on port '+port+'...');
+    app.listen(config.port);
+    console.log('Listening on port '+config.port+'...');
 });
 
