@@ -127,8 +127,11 @@
           <hr>
 
           <p id="resultsCount"></p>
-          <div id="results" class="accordion">
+          <div>
+            <ul id="facets" class="nav nav-pills">
+            </ul>
           </div>
+          <div id="results" class="accordion"></div>
 
           <a href="#" id="a_more" style="display:block;" class="btn btn-large">Mehr</a>
       </div>
@@ -169,6 +172,7 @@ Msg.clear = function() {
 // search
 var Search = {};
 Search.containerResults = $('#results');
+Search.containerFacets = $('#facets');
 Search.containerResultsCount = $('#resultsCount');
 Search.btnMore = $('#a_more');
 Search.resultsSize = 10;
@@ -177,17 +181,24 @@ Search.start = function(query) {
     if(query === '') return Msg.append('allert-error','input empty');
 
     this.query = query;
-    this.containerResults.text('');
     this.results = [];
+    this.containerResults.text('');
     this.resultsFrom = 0;
+    this.facetsActive = [];
 
     this.execute();
 };
 
 Search.execute = function() {
         Msg.clear();
+        var q = this.query;
+        $.each(this.facetsActive,function(i,v) {
+            q = '('+ q +') AND tag:'+v;
+        });
+
+        var _search = this;
         $.ajax({
-                url:'/document/_search/'+encodeURI(this.query),
+                url:'/document/_search/'+encodeURI(q),
                 dataType: 'json',
                 data:{
                     from: this.resultsFrom,
@@ -197,17 +208,22 @@ Search.execute = function() {
                     if(data['error']) {
                             Msg.append('alert-error',data['error'].message);
                     } else {
-                            Search.containerResultsCount.text(data['data'].total+' insgesamt');
+                            _search.containerFacets.text('');
+                            _search.containerResultsCount.text(data['data'].hits.total+' insgesamt');
                             console.log(data['data']);
-                            var hits = data['data'].hits;
+                            var hits = data['data'].hits.hits;
                             for(var i in hits) {
-                                Search.add(hits[i]);
+                                _search.add(hits[i]);
+                            }
+                            var facets = data['data'].facets.tag.terms;
+                            for(var i in facets) {
+                                _search.addFacets(facets[i]);
                             }
 
-                            if(data['data'].total-Search.resultsFrom-Search.resultsSize > 0) {
-                                Search.btnMore.show();
+                            if(data['data'].hits.total - _search.resultsFrom-_search.resultsSize > 0) {
+                                _search.btnMore.show();
                             } else {
-                                Search.btnMore.hide();
+                                _search.btnMore.hide();
                             }
                     }
         }});
@@ -240,6 +256,32 @@ Search.add = function(hit) {
             +'<div class="accordion-inner">'+text_highlights+'</div></div></div>');
     this.results.push(h);
     this.containerResults.append(h);
+};
+
+Search.addFacets = function(facet) {
+    var q = $('#q');
+    var strTag = 'tag:'+facet.term+'';
+
+    var f = $('<li><a href="#">'+facet.term+' ('+facet.count+')</a></li>');
+    $(f).find('a').attr('term',facet.term);
+    f.css('padding-right', '1em');
+    if($.inArray(facet.term,  this.facetsActive)>-1) f.addClass('active');
+    var _search = this;
+    f.click(function(e) {
+        e.preventDefault();
+        f.toggleClass('active');
+        if(f.hasClass('active')) {
+            _search.facetsActive.push(facet.term);
+        } else {
+            var index = $.inArray(facet.term,  _search.facetsActive);
+            if(index >-1) _search.facetsActive.splice(index,1);
+        }
+        _search.resultsFrom=0;
+        _search.results = [];
+        _search.containerResults.text('');
+        _search.execute();
+    });
+    this.containerFacets.append(f);
 };
 
 Search.download = function(fileId) {
