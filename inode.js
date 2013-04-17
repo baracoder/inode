@@ -76,13 +76,12 @@ flow.exec(function() {
                         mime: {
                             type: 'string',
                             index:'not_analyzed'
-                        }
+                        },
+                        size: { type: 'integer'}
                     }
                 },
                 published: {type:'boolean'},
-                created: {type:'date'},
                 date: {type:'date'},
-                lastIndexed: {type:'date'},
                 lastChecked: {type:'date'},
                 lastChanged: {type:'date'},
                 text: { 
