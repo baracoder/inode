@@ -51,9 +51,10 @@ find "$BASE_DIR" -type f | while read F; do
 
     # extract information
     DESCR="${F:$PREFLEN}"
-    # split words, filter duplicates, remove empty lines, join lines by coma
+    # split words, filter duplicates, remove empty lines, join lines by
+    # coma, replace comas with tags[]=
     TAGS=`echo "$DESCR"|sed 's/[\.\/ ]\+/\n/g'\
-            |sort|uniq|sed '/^$/d'|tr '\n' ','`
+            |sort|uniq|sed '/^$/d'|tr '\n' ',' |sed 's/,/\&tags[]=/g'`
     # TODO: tags filtern
 
     echo '------------------------------------------------------------------------------'
@@ -72,7 +73,7 @@ find "$BASE_DIR" -type f | while read F; do
 
     # 2. document erstellen
     RES=`curl -c $COOKIE -b $COOKIE -s -X POST  $BASE_URL/document \
-        -d "files=$FILE_ID&tags=$TAGS&description=$DESCR"`
+        -d "files[]=$FILE_ID&tags[]=$TAGS&description=$DESCR"`
     ERROR=`echo "$RES" | grep '"error":.*'`
     if [ "$ERROR" != "" -o "$RES" = "" ]; then
         echo "$F: $ERROR" >> $LOG_ERRORS
