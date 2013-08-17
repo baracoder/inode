@@ -42,9 +42,10 @@ app.get('/user/status',UserController.status);
 
 
 
+var indexName = 'documents-'+config.indexVersion;
 flow.exec(function() {
 // create indicies if not existing
-    ec.createIndex('documents',this.MULTI());
+    ec.createIndex(indexName,this.MULTI());
     ec.createIndex('queries',this.MULTI());
 }, function(results) {
 // create or update indicies
@@ -52,7 +53,7 @@ flow.exec(function() {
     console.log(results);
 
     // document mapping
-    ec.putMapping('documents','document',{
+    ec.putMapping(indexName,'document',{
         document: {
             properties: {
                 description: {
