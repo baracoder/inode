@@ -3,6 +3,7 @@ var elastical = require('elastical');
 var flow = require('jar-flow');
 
 var config = require('./config');
+var Document = require('./lib/document');
 var DocumentController = require('./lib/documentController');
 var FileController = require('./lib/fileController');
 var UserController = require('./lib/userController');
@@ -23,91 +24,34 @@ app.configure(function () {
         }));
 });
 
-// route documents
-app.get('/document/_search/:q', DocumentController.find);
-app.get('/document/:id', DocumentController.get);
-app.post('/document', DocumentController.add);
-app.put('/document/:id', DocumentController.update);
-app.delete('/document/:id', DocumentController.delete);
+var document = new Document(ec);
 
+// route documents
+var documentController = new DocumentController(document);
+var apply = function(obj, fkt) {
+    return function() {
+        return fkt.apply(obj,arguments);
+    };
+};
+app.get('/document/_search/:q', apply(documentController,documentController.find));
+app.get('/document/:id', apply(documentController,documentController.get));
+app.post('/document', apply(documentController, documentController.add));
+app.put('/document/:id', apply(documentController, documentController.update));
+app.delete('/document/:id', apply(documentController, documentController.delete));
+
+// route files
 app.get('/file/:id', FileController.get);
 app.post('/file', FileController.add);
 app.delete('/file/:id', FileController.delete);
 
+// route users
 app.post('/user/login',UserController.login);
 app.post('/user/logout',UserController.logout);
 app.get('/user/status',UserController.status);
 
 
 
-
-
-var indexName = 'documents-'+config.indexVersion;
-flow.exec(function() {
-// create indicies if not existing
-    ec.createIndex(indexName,this.MULTI());
-    ec.createIndex('queries',this.MULTI());
-}, function(results) {
-// create or update indicies
-    console.log('created:');
-    console.log(results);
-
-    // document mapping
-    ec.putMapping(indexName,'document',{
-        document: {
-            properties: {
-                description: {
-                    type:'string',
-                    term_vector:"with_positions_offsets",
-                    store:'yes'
-                },
-                tags: {
-                    type:'string',
-                    index_name:'tag',
-                    store:'yes'
-                },
-                files: {
-                    type:'nested',
-                    properties: {
-                        id: { 
-                            type:'string',
-                            index:'not_analyzed'
-                        },
-                        missing: { type: 'boolean'},
-                        mime: {
-                            type: 'string',
-                            index:'not_analyzed'
-                        },
-                        size: { type: 'integer'}
-                    }
-                },
-                published: {type:'boolean'},
-                date: {type:'date'},
-                lastChecked: {type:'date'},
-                lastChanged: {type:'date'},
-                text: { 
-                    type:'string',
-                    term_vector:"with_positions_offsets",
-                    store:'yes'
-                }
-            }
-        }
-    },this.MULTI());
-
-    // queries mapping
-    ec.putMapping('queries','docsearch',{
-        docsearch: {
-            properties: {
-                query: { type:'string'},
-                count: { type:'long'}
-            }
-        }
-    },this.MULTI());
-},function(results) {
-    console.log('updated:');
-    console.log(results);
-
     app.listen(config.port);
     console.log('Listening on port '+config.port+'...');
-});
+
 
