@@ -7,6 +7,7 @@
         "express": "3.x",
         "elastical":"*",
         "mime": "*",
+        "commander": "*",
         "mmmagic": "*",
         "jar-flow": "git://github.com/chrisinajar/flow-js.git#master"
     }
