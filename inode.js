@@ -41,31 +41,25 @@ var document = new Document(ec, file);
 var user = new User();
 
 
-var apply = function(obj, fkt) {
-    return function() {
-        return fkt.apply(obj,arguments);
-    };
-};
-
 // route documents
 var documentController = new DocumentController(document);
-app.get('/document/_search/:q', apply(documentController,documentController.find));
-app.get('/document/:id', apply(documentController,documentController.get));
-app.post('/document', apply(documentController, documentController.add));
-app.put('/document/:id', apply(documentController, documentController.update));
-app.delete('/document/:id', apply(documentController, documentController.delete));
+app.get('/document/_search/:q', documentController.find.bind(documentController));
+app.get('/document/:id', documentController.get.bind(documentController));
+app.post('/document', documentController.add.bind(documentController));
+app.put('/document/:id', documentController.update.bind(documentController));
+app.delete('/document/:id', documentController.delete.bind(documentController));
 
 // route files
 var fileController = new FileController(file);
-app.get('/file/:id', apply(fileController, fileController.get));
-app.post('/file', apply(fileController, fileController.add));
-app.delete('/file/:id', apply(fileController, fileController.delete));
+app.get('/file/:id', fileController.get.bind(fileController));
+app.post('/file', fileController.add.bind(fileController));
+app.delete('/file/:id', fileController.delete.bind(fileController));
 
 // route users
 var userController = new UserController(user, program.bypassAuth);
-app.post('/user/login', apply(userController, userController.login));
-app.post('/user/logout', apply(userController, userController.logout));
-app.get('/user/status', apply(userController, userController.status));
+app.post('/user/login', userController.login.bind(userController));
+app.post('/user/logout', userController.logout.bind(userController));
+app.get('/user/status', userController.status.bind(userController));
 
 
 
