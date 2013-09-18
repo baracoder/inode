@@ -1,7 +1,7 @@
 var express = require('express');
 var elastical = require('elastical');
-var flow = require('jar-flow');
 var program = require('commander');
+var Q = require('q');
 
 
 var Document = require('./lib/document');
@@ -18,8 +18,10 @@ program
     .option('-m, --min-tags', 'Minimum required tags', parseInt, 3)
     .option('-s, --storage <PATH>', 'Path to file storage', './storage')
     .option('-n, --no-http', 'Do not listen for HTTP connections')
+    .option('-d, --debug', 'Enabe debug')
     .parse(process.argv);
 
+Q.longStackSupport = program.debug;
 
 var ec = new elastical.Client();
 var app = express();

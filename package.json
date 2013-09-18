@@ -9,6 +9,6 @@
         "mime": "*",
         "commander": "*",
         "mmmagic": "*",
-        "jar-flow": "git://github.com/chrisinajar/flow-js.git#master"
+        "q": "*"
     }
 }
