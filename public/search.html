@@ -427,14 +427,15 @@ Upload.checkSubmitable = function() {
 };
 Upload.submit = function() {
     if(!Upload.submittable()) return;
+    // todo strip spaces from tags
     $.ajax({
             url:'/document',
             type: "POST",
             dataType: 'json',
             data:{
                 description: Upload.inputDescription.val(),
-                tags: Upload.inputTags.val(),
-                files: Upload.ids.join(',')
+                tags: Upload.inputTags.val().split(','),
+                files: Upload.ids
             },
             success: function(data, textStatus, jqXHR) {
                 console.log(data);
