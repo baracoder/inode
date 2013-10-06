@@ -96,9 +96,9 @@ Search.more = function() {
 };
 
 Search.add = function(hit) {
-    var text_highlights = '';
+    var text_highlights = [];
     if(hit.highlight) {
-        text_highlights = hit.highlight.text.join(' ...  ').replace(/<em>/g,'<b>').replace(/<\/em>/g,'</b>');
+        text_highlights = hit.highlight.text;
     }
 
     var files = hit._source.files;
@@ -114,10 +114,11 @@ Search.add = function(hit) {
         downloads: downloads,
         description: hit._source.description,
         tags: hit._source.tags.join(', '),
+        has_highlights: text_highlights.length > 0,
         text_highlights: text_highlights,
     };
 
-    var h = ich.search_row(row);
+    var h = $(ich.search_row(row));
 
     this.results.push(h);
     this.containerResults.append(h);

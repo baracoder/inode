@@ -152,21 +152,38 @@
 
     <!-- js templates -->
     <script id="search_row" type="text/html">
-      <div class="accordion-group">
-        <div class="accordion-heading">
-          <div class="pull-right">
+      <div>
+        <hr/>
+        <div>
+          <p>
             {{#downloads}}
               <a href="{{ link }}" target="_blank">
-                <span class="btn btn-success ">Download file {{ num }}</span>
-              </a>
+                <span class="badge badge-success">
+                  <i class="icon-download-alt icon-white"></i>
+                  {{ num }}
+                </span></a>
             {{/downloads}}
-          </div>
-          {{ description }}<br/>
-          <b>Tags:</b> {{ tags }}
+            &nbsp;
+            <b>
+              {{ description }}
+            </b>
+            <br/>
+            <small class="muted">
+              <b>Tags:</b> {{ tags }}
+            </small>
+          </p>
         </div>
-        <div class="accordion-body">
-          <div class="accordion-inner">{{ text_highlights }}</div>
+        {{#has_highlights}}
+        <div class="well">
+          <blockquote>
+            <small>
+            {{#text_highlights}}
+              {{&.}}
+            {{/text_highlights}}
+            </small>
+          </blockquote>
         </div>
+        {{/has_highlights}}
       </div>
     </script>
 
