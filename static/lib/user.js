@@ -1,7 +1,7 @@
 var Msg = require('./msg');
 
 
-var User = {};
+var User = {login:false, admin: false};
 User.login = function(username,password) {
     $.ajax({
             url:'../user/login',
@@ -19,6 +19,7 @@ User.login = function(username,password) {
                         Msg.append('alert-error','login failed');
                 } else {
                         Msg.append('alert-success','login successful');
+                        User.user = data.data;
                         $('#li_search a').click();
                 }
     }});
@@ -32,6 +33,7 @@ User.logout = function() {
             success: function(data, textStatus, jqXHR) {
                 console.log(data);
                 Msg.append('alert-success','logout successful');
+                User.user = {};
     }});
 };
 

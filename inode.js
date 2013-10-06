@@ -62,13 +62,15 @@ app.get('/', function (req, res) {
 // route documents
 var documentController = new DocumentController(document);
 app.get('/document/_search/:q', documentController.find.bind(documentController));
+app.post('/document/:id/publish', documentController.publish.bind(documentController));
+app.post('/document/:id/unpublish', documentController.unpublish.bind(documentController));
 app.get('/document/:id', documentController.get.bind(documentController));
 app.post('/document', documentController.add.bind(documentController));
 app.put('/document/:id', documentController.update.bind(documentController));
 app.delete('/document/:id', documentController.delete.bind(documentController));
 
 // route files
-var fileController = new FileController(file);
+var fileController = new FileController(file, document);
 app.get('/file/:id/:filename', fileController.get.bind(fileController));
 app.get('/file/:id', fileController.get.bind(fileController));
 app.post('/file', fileController.add.bind(fileController));

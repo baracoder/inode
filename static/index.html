@@ -53,6 +53,12 @@
       .example_q {
         cursor:pointer;
       }
+
+      /* search results */
+      .searchResult em {
+        font-weight: bold;
+        font-style: normal;
+      }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -75,7 +81,7 @@
           <li id="li_search"><a href="#"><i class="icon-search"></i> Suche</a></li>
           <li><a href="//infoini.de/"><i class="icon-home"></i> infoini</a></li>
         </ul>
-        <h3 class="muted">inode - infoini Lernhilfen Archiv</h3>
+        <h3 class="muted">inode - infoINI Lernhilfen</h3>
       </div>
 
       <hr>
@@ -98,8 +104,11 @@
 
       <div id="div_login" style="display:none;width:300px;margin:auto;">
         <h1>Login</h1>
+        <p>
+          Zuerst auf <a href="https://infoini.de/redmine/login">infoINI</a> einloggen.
+        </p>
           <form class="form-signin" id="form_login">
-            <input id="login_username" type="text" class="input-block-level" placeholder="Redmine username">
+            <input id="login_username" type="text" class="input-block-level" placeholder="Username">
             <input id="login_password" type="password" class="input-block-level" placeholder="Password">
             <button class="btn btn-large btn-primary" type="submit">Sign in</button>
           </form>
@@ -160,13 +169,23 @@
               <a href="{{ link }}" target="_blank">
                 <span class="badge badge-success">
                   <i class="icon-download-alt icon-white"></i>
-                  {{ num }}
+                  {{ num }} {{ type }}
                 </span></a>
             {{/downloads}}
             &nbsp;
             <b>
               {{ description }}
             </b>
+            {{#showAdmin}}
+              <span class="badge badge-important">Admin:</span>
+              {{^published}}
+                <span class="label label-warning">Unpublished</span>
+                <a href="#" class="publish" target="_blank">Publish</a>
+              {{/published}}
+              {{#published}}
+                <a href="#" class="unpublish" target="_blank">Unpublish</a>
+              {{/published}}
+            {{/showAdmin}}
             <br/>
             <small class="muted">
               <b>Tags:</b> {{ tags }}

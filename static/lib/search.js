@@ -1,4 +1,5 @@
 var Msg = require('./msg');
+var User = require('./user');
 
 
 var Search = {};
@@ -84,10 +85,14 @@ Search.add = function(hit) {
         fname = description.replace(/\//g, '_') + '.' + files[i].id.split('.')[1];
         downloads.push({
             num: (i+1).toString(),
+            type: files[i].mime.split('/')[1],
             link: '../file/' + files[i].id + '/' + fname,
         });
     }
     var row = {
+        id: hit._id,
+        showAdmin: User.user.admin,
+        published: hit._source.published,
         downloads: downloads,
         description: description,
         tags: hit._source.tags.join(', '),
@@ -96,7 +101,29 @@ Search.add = function(hit) {
     };
 
     var h = $(ich.search_row(row));
-
+    if (row.published) {
+      h.find('.unpublish').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          url:'../document/'+hit._id+'/unpublish',
+          type: 'POST',
+          success: function () {
+            Msg.append('alert-sucess', 'published');
+          }
+        });
+      });
+    } else {
+      h.find('.publish').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          url:'../document/'+hit._id+'/publish',
+          type: 'POST',
+          success: function () {
+            Msg.append('alert-sucess', 'published');
+          }
+        });
+      });
+    }
     this.results.push(h);
     this.containerResults.append(h);
 };

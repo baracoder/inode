@@ -25,6 +25,7 @@ module.exports = Msg;
 
 },{}],2:[function(require,module,exports){
 var Msg = require('./msg');
+var User = require('./user');
 
 
 var Search = {};
@@ -110,10 +111,14 @@ Search.add = function(hit) {
         fname = description.replace(/\//g, '_') + '.' + files[i].id.split('.')[1];
         downloads.push({
             num: (i+1).toString(),
+            type: files[i].mime.split('/')[1],
             link: '../file/' + files[i].id + '/' + fname,
         });
     }
     var row = {
+        id: hit._id,
+        showAdmin: User.user.admin,
+        published: hit._source.published,
         downloads: downloads,
         description: description,
         tags: hit._source.tags.join(', '),
@@ -122,7 +127,29 @@ Search.add = function(hit) {
     };
 
     var h = $(ich.search_row(row));
-
+    if (row.published) {
+      h.find('.unpublish').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          url:'../document/'+hit._id+'/unpublish',
+          type: 'POST',
+          success: function () {
+            Msg.append('alert-sucess', 'published');
+          }
+        });
+      });
+    } else {
+      h.find('.publish').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          url:'../document/'+hit._id+'/publish',
+          type: 'POST',
+          success: function () {
+            Msg.append('alert-sucess', 'published');
+          }
+        });
+      });
+    }
     this.results.push(h);
     this.containerResults.append(h);
 };
@@ -168,7 +195,7 @@ Search.clear = function() {
 
 module.exports = Search;
 
-},{"./msg":1}],3:[function(require,module,exports){
+},{"./msg":1,"./user":4}],3:[function(require,module,exports){
 var Msg = require('./msg');
 
 var Upload = {};
@@ -266,7 +293,7 @@ module.exports = Upload;
 var Msg = require('./msg');
 
 
-var User = {};
+var User = {login:false, admin: false};
 User.login = function(username,password) {
     $.ajax({
             url:'../user/login',
@@ -284,6 +311,7 @@ User.login = function(username,password) {
                         Msg.append('alert-error','login failed');
                 } else {
                         Msg.append('alert-success','login successful');
+                        User.user = data.data;
                         $('#li_search a').click();
                 }
     }});
@@ -297,6 +325,7 @@ User.logout = function() {
             success: function(data, textStatus, jqXHR) {
                 console.log(data);
                 Msg.append('alert-success','logout successful');
+                User.user = {};
     }});
 };
 
