@@ -69,6 +69,7 @@ app.delete('/document/:id', documentController.delete.bind(documentController));
 
 // route files
 var fileController = new FileController(file);
+app.get('/file/:id/:filename', fileController.get.bind(fileController));
 app.get('/file/:id', fileController.get.bind(fileController));
 app.post('/file', fileController.add.bind(fileController));
 app.delete('/file/:id', fileController.delete.bind(fileController));

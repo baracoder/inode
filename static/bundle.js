@@ -91,7 +91,7 @@ Search.execute = function() {
 
 Search.more = function() {
     this.resultsFrom += this.resultsSize;
-    this.containerResults.find('.accordion-group').addClass('muted');
+    this.containerResults.find('.searchResult').addClass('muted');
     this.execute();
 };
 
@@ -102,17 +102,20 @@ Search.add = function(hit) {
     }
 
     var files = hit._source.files;
+    var description = hit._source.description;
     var downloads = [];
     var i;
+    var fname;
     for(i = 0; i < files.length; i++) {
+        fname = description.replace(/\//g, '_') + '.' + files[i].id.split('.')[1];
         downloads.push({
             num: (i+1).toString(),
-            link: '../file/' + files[i].id,
+            link: '../file/' + files[i].id + '/' + fname,
         });
     }
     var row = {
         downloads: downloads,
-        description: hit._source.description,
+        description: description,
         tags: hit._source.tags.join(', '),
         has_highlights: text_highlights.length > 0,
         text_highlights: text_highlights,
