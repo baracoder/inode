@@ -33,12 +33,13 @@ app.configure(function () {
     app.use(express.logger('dev')); /* 'default', 'short', 'tiny', 'dev' */
     app.use(express.bodyParser());
     //app.use(express.limit('20mb')); // TODO absprechen
-    app.use('/static', express.static(__dirname + '/public'));
+    app.use('/lernhilfen/static', express.static(__dirname + '/static'));
     app.use(express.cookieParser());
     app.use(express.cookieSession({
         secret:Math.random()+new Date(),
         key:'inode'
         }));
+    app.use('/lernhilfen', app.router);
 });
 
 var file = new File(program.storage);
@@ -51,6 +52,11 @@ var taskQueue = new TaskQueue(ec, file, document, {
 });
 document.event.on('created', function(doc) {
     taskQueue.push('extract', doc._id);
+});
+
+// if index is requested, redirect to web-ui
+app.get('/', function (req, res) {
+    res.redirect('./static/');
 });
 
 // route documents

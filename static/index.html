@@ -203,7 +203,7 @@ Search.execute = function() {
 
         var _search = this;
         $.ajax({
-                url:'/document/_search/'+encodeURI(q),
+                url:'../document/_search/'+encodeURI(q),
                 dataType: 'json',
                 data:{
                     from: this.resultsFrom,
@@ -290,7 +290,7 @@ Search.addFacets = function(facet) {
 };
 
 Search.download = function(fileId) {
-        window.open('/file/'+fileId);
+        window.open('../file/'+fileId);
 };
 
 Search.clear = function() {
@@ -318,7 +318,7 @@ $('.example_q').click(function() {
 User = {};
 User.login = function(username,password) {
     $.ajax({
-            url:'/user/login',
+            url:'../user/login',
             type: "POST",
             dataType: 'json',
             data:{
@@ -339,7 +339,7 @@ User.login = function(username,password) {
 };
 User.logout = function() {
     $.ajax({
-            url:'/user/logout',
+            url:'../user/logout',
             type: "POST",
             dataType: 'json',
             success: function(data, textStatus, jqXHR) {
@@ -390,7 +390,7 @@ Upload.addToQueue = function() {
         data.append('file', this.files[0]);
         // Ajax-Call
         $.ajax({
-            url: '/file',
+            url: '../file',
             data: data,
             type: 'POST',
             processData: false,
@@ -429,7 +429,7 @@ Upload.submit = function() {
     if(!Upload.submittable()) return;
     // todo strip spaces from tags
     $.ajax({
-            url:'/document',
+            url:'../document',
             type: "POST",
             dataType: 'json',
             data:{
