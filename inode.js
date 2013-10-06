@@ -7,6 +7,7 @@ var Q = require('q');
 var Document = require('./lib/document');
 var File = require('./lib/file');
 var User = require('./lib/user');
+var TaskQueue = require('./lib/taskQueue');
 var DocumentController = require('./lib/documentController');
 var FileController = require('./lib/fileController');
 var UserController = require('./lib/userController');
@@ -16,6 +17,8 @@ program
     .option('-p, --port <n>', 'HTTP port', parseInt, 3000)
     .option('-b, --bypass-auth', 'Bypass authentication')
     .option('-m, --min-tags', 'Minimum required tags', parseInt, 3)
+    .option('-M, --maxTasks', 'Maximum background tasks running at once', parseInt, 3)
+    .option('-N, --no-tasks', 'Do not run tasks')
     .option('-s, --storage <PATH>', 'Path to file storage', './storage')
     .option('-n, --no-http', 'Do not listen for HTTP connections')
     .option('-d, --debug', 'Enabe debug')
@@ -33,7 +36,7 @@ app.configure(function () {
     app.use('/static', express.static(__dirname + '/public'));
     app.use(express.cookieParser());
     app.use(express.cookieSession({
-        secret:''+Math.random()+new Date(),
+        secret:Math.random()+new Date(),
         key:'inode'
         }));
 });
@@ -42,6 +45,13 @@ var file = new File(program.storage);
 var document = new Document(ec, file);
 var user = new User();
 
+var taskQueue = new TaskQueue(ec, file, document, { 
+    maxTasks: program.maxTasks,
+    start: program.tasks
+});
+document.event.on('created', function(doc) {
+    taskQueue.push('extract', doc._id);
+});
 
 // route documents
 var documentController = new DocumentController(document);

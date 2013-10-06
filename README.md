@@ -122,13 +122,12 @@ Indecies
 * tasks
     * als warteshlange für tasks
     * type (string)
+    * worker (string) hostname
     * issued (date) tasks werden nach dem datum abgearbeitet
     * finished (date) wird automatisch gesetzt
-    * status (string) 'complete', 'processing', 'error'
+    * status (string) 'pending', 'complete', 'processing', 'failed'
     * error (sting) optional
-    * target (string), optional, wenn nur bestimmtes dokument/bestimte
-      datei betroffen ist
-
+    * targets (string), betroffene ids (je nach typ dokument oder file)
 
 API
 ===
