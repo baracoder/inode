@@ -37,7 +37,7 @@ PREFLEN=`echo -n "$BASE_DIR"|wc -m`
 # login
 read -p 'login: ' USERNAME
 read -s -p 'password: ' PASSWORD
-RES=`curl -XPOST -d "username=$USERNAME&password=$PASSWORD" $BASE_URL/user/login`
+RES=`curl -b $COOKIE -c $COOKIE -XPOST -d "username=$USERNAME&password=$PASSWORD" $BASE_URL/user/login`
 ERROR=`echo "$RES" | grep '"error":.*'`
 if [ "$ERROR" != "" -o "$RES" = "" ]; then
     die "$F: $ERROR" >> $LOG_ERRORS
@@ -45,7 +45,7 @@ fi
 
 
 # import files
-find "$BASE_DIR" -type f | while read F; do 
+find "$BASE_DIR" -type f | while read F; do
     # check if file already scanned
     grep -q "$F" "$LOG_IMPORTED" && continue
 
@@ -63,18 +63,19 @@ find "$BASE_DIR" -type f | while read F; do
     # TODO: curl requests:
     # 1. datei hochladen
     RES=`curl -c $COOKIE -b $COOKIE -s -X POST -F "file=@$F"   $BASE_URL/file`
+    R=$?
     ERROR=`echo "$RES" | grep '"error":.*'`
-    if [ "$ERROR" != "" -o "$RES" = "" ]; then
+    if [ "$ERROR" != "" -o "$RES" = "" -o $R -ne 0 ]; then
         echo "$F: $ERROR" >> $LOG_ERRORS
         continue
     fi
     FILE_ID=`echo "$RES"|sed 's/.*"id":"\([^"]\+\)".*/\1/g'`
     echo $FILE_ID
-    TITLE=`basename "$DESCR"`
+    TITLE=`basename "${DESCR%.*}"`
 
     # 2. document erstellen
     RES=`curl -c $COOKIE -b $COOKIE -s -X POST  $BASE_URL/document \
-        -d "files[]=$FILE_ID&tags[]=$TAGS&description=$TITLE"`
+        -d "files[]=$FILE_ID&tags[]=$TAGS&description=$TITLE&published=true"`
     ERROR=`echo "$RES" | grep '"error":.*'`
     if [ "$ERROR" != "" -o "$RES" = "" ]; then
         echo "$F: $ERROR" >> $LOG_ERRORS
