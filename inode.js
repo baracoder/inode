@@ -32,7 +32,7 @@ var app = express();
 app.configure(function () {
     app.use(express.logger('dev')); /* 'default', 'short', 'tiny', 'dev' */
     app.use(express.bodyParser());
-    //app.use(express.limit('20mb')); // TODO absprechen
+    app.use(express.limit('50mb')); // TODO absprechen
     app.use('/lernhilfen/static', express.static(__dirname + '/static'));
     app.use(express.cookieParser());
     app.use(express.cookieSession({
