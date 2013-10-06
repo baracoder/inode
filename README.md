@@ -47,7 +47,6 @@ Einstellungsdatum abgearbeitet und der Status wird vermerkt.
     * Text begrenzt auf 1000 wörter pro Dokument
     * Bilder aus PDF werden extahiert und durch OCR gescannt
       (um eingescannte PDFs durchsuchbar zu machen)
-    * Text wird in ORM gespeichert
     * Mögliche Erweiterung zum einlesen von word/exel usw
       http://archive09.linux.com/articles/52385
         * odt2text
@@ -67,8 +66,7 @@ Zugang
 
 * Hochladen darf jeder
     * Dokumente sind erstmal nur für Admins sichtbar
-* Suchen und Runterladen nur mit Login
-  von Dokumenten
+* Suchen nur mit Login
 * Download von Dateien nur mit valider SessionID im Request
   und wenn Datei einem Dokument zugewiesen ist. Ist man nicht Admin,
   so muss das Dokument als public markiert sein
