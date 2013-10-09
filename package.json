@@ -7,6 +7,7 @@
         "express": "3.x",
         "elastical":"*",
         "mime": "*",
+        "restler": "*",
         "commander": "*",
         "mmmagic": "*",
         "q": "*"
